@@ -741,6 +741,8 @@ def to_usd(
     mesh_prim = UsdGeom.Mesh.Define(stage, "/Mesh")
     vertices = export_data.vertices
     faces = export_data.faces.astype(np.int32)
+    mesh_prim.GetSubdivisionSchemeAttr().Set(UsdGeom.Tokens.none)
+    mesh_prim.CreateDoubleSidedAttr(True)
     mesh_prim.CreatePointsAttr(
         [
             Gf.Vec3f(
