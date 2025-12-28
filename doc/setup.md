@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-* A linux 64-bits architecture (i.e. `linux-64` platform in `mamba info`).
-* A NVIDIA GPU with at least 32 Gb of VRAM.
+- A linux 64-bits architecture (i.e. `linux-64` platform in `mamba info`).
+- A NVIDIA GPU with at least 32 Gb of VRAM.
 
 ## 1. Setup Python Environment
 
