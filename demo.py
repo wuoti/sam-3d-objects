@@ -11,7 +11,7 @@ config_path = f"checkpoints/{tag}/pipeline.yaml"
 inference = Inference(config_path, compile=False)
 
 # load image (RGBA only, mask is embedded in the alpha channel)
-image = load_image("notebook/images/chair/chair.png")
+image = load_image("notebook/images/chair/chair_rgba.png")
 mask = None
 
 # Optional USD export path (set to a filename to enable)
