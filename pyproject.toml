@@ -66,6 +66,13 @@ dependencies = [
   "seaborn==0.13.2",
   "pytest",
   "optree==0.14.1",
+
+  # --------------------
+  # API
+  # --------------------
+  "fastapi==0.115.6",
+  "uvicorn[standard]==0.32.1",
+  "python-multipart==0.0.20",
 ]
 
 [tool.hatch.build]

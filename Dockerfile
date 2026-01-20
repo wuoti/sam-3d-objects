@@ -99,5 +99,5 @@ ENV PATH="/app/.venv/bin:${PATH}"
 ENV PYTHONPATH=/app
 ENV PYTORCH_JIT=0
 
-# Default: keep alive (RunPod-friendly). Run demo manually or change this.
-CMD ["bash", "-lc", "python -c \"import torch; print(torch.__version__, torch.cuda.is_available())\" && sleep infinity"]
+EXPOSE 8000
+CMD ["bash", "-lc", "uvicorn api.main:app --host 0.0.0.0 --port 8000"]
