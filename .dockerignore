@@ -1,0 +1,88 @@
+# --------------------
+# VCS
+# --------------------
+.git
+.gitignore
+.github
+
+# --------------------
+# Python caches
+# --------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.dist-info/
+
+# --------------------
+# Virtual environments (never copy host venvs)
+# --------------------
+.venv/
+venv/
+env/
+
+# --------------------
+# Build / packaging
+# --------------------
+build/
+dist/
+.wheels/
+pip-wheel-metadata/
+
+# --------------------
+# IDE / editor
+# --------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# --------------------
+# OS junk
+# --------------------
+.DS_Store
+Thumbs.db
+
+# --------------------
+# Logs
+# --------------------
+*.log
+logs/
+
+# --------------------
+# Data & outputs
+# --------------------
+checkpoints/**/*.pt
+checkpoints/**/*.ckpt
+checkpoints/**/*.pth
+checkpoints/**/*.bin
+
+# model outputs / artifacts
+*.ply
+*.obj
+*.glb
+*.usd
+*.usda
+*.usdc
+
+# --------------------
+# Notebooks & large assets (optional but recommended)
+# --------------------
+notebook/**/*.ipynb
+notebook/**/__pycache__/
+
+# --------------------
+# Downloads / caches
+# --------------------
+.cache/
+.cache/**
+
+# --------------------
+# Local configs / secrets
+# --------------------
+.env
+.env.*
