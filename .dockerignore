@@ -75,6 +75,26 @@ checkpoints/**/*.bin
 notebook/**/*.ipynb
 notebook/**/__pycache__/
 
+# Large image datasets (214MB+) - only needed for demos, not API
+notebook/images/
+notebook/gaussians/
+notebook/meshes/
+
+# --------------------
+# Documentation & demos
+# --------------------
+doc/
+demo.py
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+README.md
+
+# --------------------
+# Development dependencies
+# --------------------
+requirements.dev.txt
+environments/
+
 # --------------------
 # Downloads / caches
 # --------------------
