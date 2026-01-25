@@ -58,6 +58,9 @@ def run_job(
     if output.get("usd_path") and os.path.exists(output["usd_path"]):
         produced["reconstruction.usd"] = output["usd_path"]
 
+    if output.get("usdz_path") and os.path.exists(output["usdz_path"]):
+        produced["reconstruction.usdz"] = output["usdz_path"]
+
     # If your pipeline also returns glb_path, include it
     if output.get("glb_path") and os.path.exists(output["glb_path"]):
         produced["reconstruction.glb"] = output["glb_path"]

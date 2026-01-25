@@ -91,7 +91,7 @@ def get_job(job_id: str):
 @app.get("/v1/jobs/{job_id}/artifact/{name}")
 def get_artifact(job_id: str, name: str):
     # Only allow known names to avoid path traversal
-    allowed = {"splat.ply", "reconstruction.usd", "reconstruction.glb", "outputs.zip"}
+    allowed = {"splat.ply", "reconstruction.usd", "reconstruction.usdz", "reconstruction.glb", "outputs.zip"}
     if name not in allowed:
         raise HTTPException(status_code=404, detail="unknown artifact")
 
