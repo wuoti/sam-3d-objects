@@ -35,8 +35,10 @@ dependencies = [
   # Geometry / vision
   # --------------------
   "open3d==0.18.0",
+  "pillow==10.4.0",
   "pymeshfix==0.17.0",
   "scikit-image==0.23.1",
+  "segment-anything==1.0",
   "xatlas==0.0.9",
 
   # OpenCV pinned to NumPy 1.x–compatible build

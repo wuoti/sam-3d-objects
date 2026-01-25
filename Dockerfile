@@ -100,4 +100,4 @@ ENV PYTHONPATH=/app
 ENV PYTORCH_JIT=0
 
 EXPOSE 8000
-CMD ["bash", "-lc", "uvicorn api.main:app --host 0.0.0.0 --port 8000"]
+CMD ["bash", "-lc", "/app/scripts/entrypoint.sh"]

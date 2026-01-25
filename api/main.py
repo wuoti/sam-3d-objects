@@ -4,10 +4,11 @@ import threading
 from typing import Dict
 
 from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from .models import CreateJobResponse, JobInfo
 from .storage import job_input_path, job_output_path, job_dir
+from .bg_remove import remove_background
 from .worker import run_job
 
 app = FastAPI(title="SAM-3D Objects API", version="0.1.0")
@@ -99,3 +100,17 @@ def get_artifact(job_id: str, name: str):
         raise HTTPException(status_code=404, detail="artifact not found")
 
     return FileResponse(str(p), filename=p.name)
+
+
+@app.post("/v1/remove-bg")
+async def remove_bg(image: UploadFile = File(...)):
+    if image.content_type not in {"image/jpeg", "image/png", "image/webp"}:
+        raise HTTPException(status_code=415, detail="unsupported image type")
+
+    data = await image.read()
+    try:
+        output = remove_background(data)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return Response(content=output, media_type="image/png")
