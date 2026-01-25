@@ -103,13 +103,16 @@ def get_artifact(job_id: str, name: str):
 
 
 @app.post("/v1/remove-bg")
-async def remove_bg(image: UploadFile = File(...)):
+async def remove_bg(
+    image: UploadFile = File(...),
+    invert: bool = False,
+):
     if image.content_type not in {"image/jpeg", "image/png", "image/webp"}:
         raise HTTPException(status_code=415, detail="unsupported image type")
 
     data = await image.read()
     try:
-        output = remove_background(data)
+        output = remove_background(data, invert=invert)
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 

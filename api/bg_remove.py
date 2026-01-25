@@ -50,7 +50,43 @@ def get_sam_generator() -> SamAutomaticMaskGenerator:
     return _GENERATOR
 
 
-def remove_background(image_bytes: bytes) -> bytes:
+def _score_mask_background(mask: np.ndarray, image_shape) -> float:
+    h, w = image_shape[:2]
+    ys, xs = np.nonzero(mask)
+    if len(xs) == 0:
+        return -1.0
+
+    cy = ys.mean() / max(h - 1, 1)
+    cx = xs.mean() / max(w - 1, 1)
+    center_dist = ((cx - 0.5) ** 2 + (cy - 0.5) ** 2) ** 0.5
+
+    edge = np.zeros_like(mask, dtype=bool)
+    edge[0, :] = True
+    edge[-1, :] = True
+    edge[:, 0] = True
+    edge[:, -1] = True
+    edge_touch = (mask.astype(bool) & edge).sum() / max(edge.sum(), 1)
+
+    size_ratio = mask.sum() / (h * w)
+
+    center_w = float(os.environ.get("SAM_CENTER_WEIGHT", "1.0"))
+    edge_w = float(os.environ.get("SAM_EDGE_WEIGHT", "0.7"))
+    size_w = float(os.environ.get("SAM_SIZE_WEIGHT", "0.3"))
+
+    return (edge_w * edge_touch) + (size_w * size_ratio) - (center_w * (1.0 - center_dist))
+
+
+def _pick_background_mask(masks, image_shape, image_area: int) -> np.ndarray:
+    # Prefer masks not covering almost the whole image.
+    max_bg_ratio = float(os.environ.get("SAM_BG_MAX_RATIO", "0.95"))
+    allowed = [m for m in masks if (m.get("area", 0) / image_area) <= max_bg_ratio]
+    if not allowed:
+        allowed = masks
+    best = max(allowed, key=lambda m: _score_mask_background(m["segmentation"], image_shape))
+    return best["segmentation"].astype(np.uint8)
+
+
+def remove_background(image_bytes: bytes, invert: bool = False) -> bytes:
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     np_image = np.array(image)
 
@@ -61,8 +97,11 @@ def remove_background(image_bytes: bytes) -> bytes:
     if not masks:
         raise RuntimeError("No masks generated")
 
-    best = max(masks, key=lambda m: m.get("area", 0))
-    mask = best["segmentation"].astype(np.uint8)
+    image_area = np_image.shape[0] * np_image.shape[1]
+    mask = _pick_background_mask(masks, np_image.shape, image_area)
+    invert = not invert
+    if invert:
+        mask = 1 - mask
     alpha = (mask * 255).astype(np.uint8)
 
     rgba = np.dstack([np_image, alpha])
