@@ -1,108 +1,30 @@
-# --------------------
-# VCS
-# --------------------
 .git
-.gitignore
 .github
-
-# --------------------
-# Python caches
-# --------------------
+.vscode
 __pycache__/
-*.py[cod]
+*.pyc
 *.pyo
 *.pyd
 *.so
-*.egg-info/
-.eggs/
-.dist-info/
-
-# --------------------
-# Virtual environments (never copy host venvs)
-# --------------------
-.venv/
-venv/
-env/
-
-# --------------------
-# Build / packaging
-# --------------------
+*.a
+*.o
+*.whl
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 build/
 dist/
-.wheels/
-pip-wheel-metadata/
-
-# --------------------
-# IDE / editor
-# --------------------
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# --------------------
-# OS junk
-# --------------------
-.DS_Store
-Thumbs.db
-
-# --------------------
-# Logs
-# --------------------
-*.log
-logs/
-
-# --------------------
-# Data & outputs
-# --------------------
+.venv/
+venv/
+node_modules/
+notebook/*.ipynb
+notebook/*.png
+notebook/*.jpg
+notebook/*.jpeg
+notebook/*.gif
+doc/
+checkpoints/*
+checkpoints/**/*.pth
 checkpoints/**/*.pt
 checkpoints/**/*.ckpt
-checkpoints/**/*.pth
-checkpoints/**/*.bin
-
-# model outputs / artifacts
-*.ply
-*.obj
-*.glb
-*.usd
-*.usda
-*.usdc
-
-# --------------------
-# Notebooks & large assets (optional but recommended)
-# --------------------
-notebook/**/*.ipynb
-notebook/**/__pycache__/
-
-# Large image datasets (214MB+) - only needed for demos, not API
-notebook/images/
-notebook/gaussians/
-notebook/meshes/
-
-# --------------------
-# Documentation & demos
-# --------------------
-doc/
-demo.py
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
-README.md
-
-# --------------------
-# Development dependencies
-# --------------------
-requirements.dev.txt
-environments/
-
-# --------------------
-# Downloads / caches
-# --------------------
-.cache/
-.cache/**
-
-# --------------------
-# Local configs / secrets
-# --------------------
-.env
-.env.*
+checkpoints/**/*.safetensors

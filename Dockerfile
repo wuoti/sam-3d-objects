@@ -92,8 +92,14 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
-# Copy app + venv from builder
-COPY --from=builder /app /app
+# Copy runtime essentials from builder
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/api /app/api
+COPY --from=builder /app/sam3d_objects /app/sam3d_objects
+COPY --from=builder /app/notebook/inference.py /app/notebook/inference.py
+COPY --from=builder /app/scripts /app/scripts
+COPY --from=builder /app/pyproject.toml /app/pyproject.toml
+RUN mkdir -p /app/checkpoints
 
 ENV PATH="/app/.venv/bin:${PATH}"
 ENV PYTHONPATH=/app
