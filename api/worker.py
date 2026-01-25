@@ -61,8 +61,12 @@ def run_job(
     if output.get("usdz_path") and os.path.exists(output["usdz_path"]):
         produced["reconstruction.usdz"] = output["usdz_path"]
 
-    # If your pipeline also returns glb_path, include it
-    if output.get("glb_path") and os.path.exists(output["glb_path"]):
+    # GLB export: pipeline returns a trimesh object, not a path
+    if output.get("glb") is not None:
+        glb_path = job_output_path(job_id, "reconstruction.glb")
+        output["glb"].export(str(glb_path))
+        produced["reconstruction.glb"] = str(glb_path)
+    elif output.get("glb_path") and os.path.exists(output["glb_path"]):
         produced["reconstruction.glb"] = output["glb_path"]
 
     # zip outputs for convenience
