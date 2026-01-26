@@ -52,6 +52,9 @@ COPY . /app
 ENV UV_CACHE_DIR=/tmp/uv-cache
 RUN uv sync --no-dev --active
 
+# ---- Hugging Face CLI + git-xet (for checkpoint download) ----
+RUN python -m pip install "huggingface-hub[cli]<1.0" git-xet
+
 # ---- Sanity checks (this time we DO validate nvdiffrast presence) ----
 RUN python - <<'PY'
 import sys, torch, numpy as np
