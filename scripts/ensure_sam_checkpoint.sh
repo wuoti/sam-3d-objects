@@ -2,7 +2,7 @@
 set -euo pipefail
 
 MODEL_TYPE="${SAM_MODEL_TYPE:-vit_h}"
-CHECKPOINT_PATH="${SAM_CHECKPOINT:-/app/checkpoints/${MODEL_TYPE}.pth}"
+CHECKPOINT_PATH="${SAM_CHECKPOINT:-/app/checkpoints/sam/${MODEL_TYPE}.pth}"
 
 case "${MODEL_TYPE}" in
   vit_h)
