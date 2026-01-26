@@ -55,9 +55,15 @@ def _set(job_id: str, **kwargs):
 def _run_in_background(job_id: str, image_fs_path: str, seed: int, export_usd: bool, usd_scale_factor: float):
     _set(job_id, status="running", started_at=time.time())
     try:
+        with open(image_fs_path, "rb") as handle:
+            image_bytes = handle.read()
+        output = remove_background(image_bytes, invert=False)
+        processed_path = job_input_path(job_id, "input.png")
+        processed_path.write_bytes(output)
+
         result = run_job(
             job_id=job_id,
-            image_path=image_fs_path,
+            image_path=str(processed_path),
             seed=seed,
             export_usd=export_usd,
             usd_scale_factor=usd_scale_factor,
@@ -128,6 +134,9 @@ async def create_job(
         JOBS[job_id] = job
 
     # Save input image
+    if image.content_type not in {"image/jpeg", "image/png", "image/webp"}:
+        raise HTTPException(status_code=415, detail="unsupported image type")
+
     filename = image.filename or "input.png"
     img_path = job_input_path(job_id, filename)
     img_path.write_bytes(await image.read())
