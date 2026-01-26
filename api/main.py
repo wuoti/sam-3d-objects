@@ -52,7 +52,7 @@ def _set(job_id: str, **kwargs):
             setattr(job, k, v)
         JOBS[job_id] = job
 
-def _run_in_background(job_id: str, image_fs_path: str, seed: int, export_usd: bool, usd_scale_factor: float):
+def _run_in_background(job_id: str, image_fs_path: str, seed: int):
     _set(job_id, status="running", started_at=time.time())
     try:
         with open(image_fs_path, "rb") as handle:
@@ -65,8 +65,6 @@ def _run_in_background(job_id: str, image_fs_path: str, seed: int, export_usd: b
             job_id=job_id,
             image_path=str(processed_path),
             seed=seed,
-            export_usd=export_usd,
-            usd_scale_factor=usd_scale_factor,
         )
 
         outputs = {}
@@ -123,8 +121,6 @@ async def create_job(
     background_tasks: BackgroundTasks,
     image: UploadFile = File(...),
     seed: int = Form(42),
-    export_usd: bool = Form(True),
-    usd_scale_factor: float = Form(100.0),
 ):
     job_id = uuid.uuid4().hex
     job_dir(job_id)  # ensure dirs exist
@@ -141,7 +137,7 @@ async def create_job(
     img_path = job_input_path(job_id, filename)
     img_path.write_bytes(await image.read())
 
-    background_tasks.add_task(_run_in_background, job_id, str(img_path), seed, export_usd, usd_scale_factor)
+    background_tasks.add_task(_run_in_background, job_id, str(img_path), seed)
     return CreateJobResponse(job_id=job_id)
 
 @app.get("/v1/jobs/{job_id}", response_model=JobInfo)
@@ -155,7 +151,7 @@ def get_job(job_id: str):
 @app.get("/v1/jobs/{job_id}/artifact/{name}")
 def get_artifact(job_id: str, name: str):
     # Only allow known names to avoid path traversal
-    allowed = {"splat.ply", "reconstruction.usd", "reconstruction.usdz", "reconstruction.glb", "outputs.zip"}
+    allowed = {"reconstruction.glb"}
     if name not in allowed:
         raise HTTPException(status_code=404, detail="unknown artifact")
 

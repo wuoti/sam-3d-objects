@@ -111,6 +111,7 @@ RUN mkdir -p /app/checkpoints
 ENV PATH="/app/.venv/bin:${PATH}"
 ENV PYTHONPATH=/app
 ENV PYTORCH_JIT=0
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 EXPOSE 8000
 CMD ["bash", "-lc", "/app/scripts/entrypoint.sh"]
