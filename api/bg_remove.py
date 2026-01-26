@@ -13,13 +13,13 @@ _GENERATOR: Optional[SamAutomaticMaskGenerator] = None
 
 
 def _build_generator() -> SamAutomaticMaskGenerator:
-    checkpoint = os.environ.get("SAM_CHECKPOINT")
-    if not checkpoint:
-        raise RuntimeError("SAM_CHECKPOINT is not set")
-
     model_type = os.environ.get("SAM_MODEL_TYPE", "vit_h")
     if model_type not in sam_model_registry:
         raise RuntimeError(f"Unknown SAM model type: {model_type}")
+
+    checkpoint = os.environ.get("SAM_CHECKPOINT", f"/app/checkpoints/sam/{model_type}.pth")
+    if not checkpoint:
+        raise RuntimeError("SAM_CHECKPOINT is not set")
 
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is not available; GPU is required for this endpoint")
