@@ -1,9 +1,12 @@
 import time
+import os
+import hmac
+import hashlib
 import uuid
 import threading
 from typing import Dict
 
-from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 
 from .models import CreateJobResponse, JobInfo
@@ -15,6 +18,27 @@ app = FastAPI(title="SAM-3D Objects API", version="0.1.0")
 
 JOBS: Dict[str, JobInfo] = {}
 LOCK = threading.Lock()
+
+AUTH_HEADER = "x-sam-auth"
+TIMESTAMP_HEADER = "x-sam-timestamp"
+AUTH_WINDOW_SEC = int(os.environ.get("SAM_AUTH_WINDOW_SEC", "300"))
+
+
+def _auth_disabled() -> bool:
+    return os.environ.get("SAM_AUTH_DISABLED", "false").lower() in {"1", "true", "yes"}
+
+
+def _auth_secret() -> str:
+    return os.environ.get("SAM_AUTH_SECRET", "")
+
+
+def _constant_time_eq(a: str, b: str) -> bool:
+    return hmac.compare_digest(a.encode("utf-8"), b.encode("utf-8"))
+
+
+def _sign(secret: str, ts: str, method: str, path: str, body: bytes) -> str:
+    msg = b".".join([ts.encode("utf-8"), method.encode("utf-8"), path.encode("utf-8"), body])
+    return hmac.new(secret.encode("utf-8"), msg, hashlib.sha256).hexdigest()
 
 def _download_url(job_id: str, artifact: str) -> str:
     return f"/v1/jobs/{job_id}/artifact/{artifact}"
@@ -56,6 +80,37 @@ def _run_in_background(job_id: str, image_fs_path: str, seed: int, export_usd: b
 @app.get("/healthz")
 def healthz():
     return {"ok": True}
+
+
+@app.middleware("http")
+async def require_hmac(request: Request, call_next):
+    if _auth_disabled() or request.url.path == "/healthz":
+        return await call_next(request)
+
+    secret = _auth_secret()
+    if not secret:
+        return Response(status_code=500, content="auth secret not configured")
+
+    ts = request.headers.get(TIMESTAMP_HEADER, "")
+    sig = request.headers.get(AUTH_HEADER, "")
+    if not ts or not sig:
+        return Response(status_code=401, content="missing auth headers")
+
+    try:
+        ts_int = int(ts)
+    except ValueError:
+        return Response(status_code=401, content="invalid timestamp")
+
+    now = int(time.time())
+    if abs(now - ts_int) > AUTH_WINDOW_SEC:
+        return Response(status_code=401, content="timestamp outside allowed window")
+
+    body = await request.body()
+    expected = _sign(secret, ts, request.method.upper(), request.url.path, body)
+    if not _constant_time_eq(expected, sig):
+        return Response(status_code=401, content="invalid signature")
+
+    return await call_next(request)
 
 @app.post("/v1/jobs", response_model=CreateJobResponse)
 async def create_job(
