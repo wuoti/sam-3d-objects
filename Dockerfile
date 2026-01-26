@@ -52,8 +52,8 @@ COPY . /app
 ENV UV_CACHE_DIR=/tmp/uv-cache
 RUN uv sync --no-dev --active
 
-# ---- Hugging Face CLI + git-xet (for checkpoint download) ----
-RUN python -m pip install "huggingface-hub[cli]<1.0" git-xet
+# ---- Hugging Face CLI (for checkpoint download) ----
+RUN python -m pip install huggingface-hub
 
 # ---- Sanity checks (this time we DO validate nvdiffrast presence) ----
 RUN python - <<'PY'
@@ -94,6 +94,10 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+
+# ---- Git-Xet (for Hugging Face Xet storage) ----
+RUN curl --proto '=https' --tlsv1.2 -sSf \
+    https://raw.githubusercontent.com/huggingface/xet-core/refs/heads/main/git_xet/install.sh | sh
 
 # Copy runtime essentials from builder
 COPY --from=builder /app/.venv /app/.venv
