@@ -17,3 +17,5 @@ timm==0.9.16
 xatlas==0.0.9
 xformers==0.0.28.post3
 MoGe @ git+https://github.com/microsoft/MoGe.git@a8c37341bc0325ca99b9d57981cc3bb2bd3e255b
+boto3==1.35.99
+redis==5.0.8

@@ -75,6 +75,8 @@ dependencies = [
   "fastapi==0.115.6",
   "uvicorn[standard]==0.32.1",
   "python-multipart==0.0.20",
+  "boto3==1.35.99",
+  "redis==5.0.8",
 ]
 
 [tool.hatch.build]
