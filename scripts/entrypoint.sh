@@ -6,6 +6,4 @@ export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:T
 /app/scripts/ensure_sam_checkpoint.sh
 /app/scripts/ensure_sam3d_checkpoints.sh
 
-python -m api.stream_service &
-
-exec uvicorn api.main:app --host 0.0.0.0 --port 8000
+python -m api.stream_service
