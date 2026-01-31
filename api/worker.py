@@ -3,6 +3,9 @@ import sys
 import time
 from typing import Optional, Dict, Any
 
+import numpy as np
+from PIL import Image
+
 # Fix for the timm/torchscript segfault you already saw
 os.environ.setdefault("PYTORCH_JIT", "0")
 
@@ -13,6 +16,7 @@ from inference import Inference, load_image  # noqa
 from .storage import job_output_path
 
 _INFERENCE: Optional[Inference] = None
+MAX_INPUT_SIZE = int(os.environ.get("SAM3D_MAX_INPUT_SIZE", "0"))
 
 def get_inference() -> Inference:
     global _INFERENCE
@@ -21,6 +25,20 @@ def get_inference() -> Inference:
         config_path = f"checkpoints/{tag}/pipeline.yaml"
         _INFERENCE = Inference(config_path, compile=False)
     return _INFERENCE
+
+
+def _load_image_with_resize(image_path: str) -> np.ndarray:
+    if MAX_INPUT_SIZE <= 0:
+        return load_image(image_path)
+
+    image = Image.open(image_path).convert("RGBA")
+    w, h = image.size
+    max_side = max(w, h)
+    if max_side > MAX_INPUT_SIZE:
+        scale = MAX_INPUT_SIZE / max_side
+        new_size = (max(1, int(round(w * scale))), max(1, int(round(h * scale))))
+        image = image.resize(new_size, resample=Image.LANCZOS)
+    return np.array(image, dtype=np.uint8)
 
 def run_job(
     job_id: str,
@@ -31,7 +49,7 @@ def run_job(
     inference = get_inference()
 
     # Your flow: RGBA with mask embedded in alpha
-    image = load_image(image_path)
+    image = _load_image_with_resize(image_path)
     mask = None
 
     output = inference(
