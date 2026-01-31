@@ -1,4 +1,5 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
+import gc
 import os
 from pathlib import Path
 
@@ -654,12 +655,17 @@ class InferencePipeline:
         logger.info("Decoding sparse latent...")
         ret = {}
         with torch.no_grad():
-            if "mesh" in formats:
-                ret["mesh"] = self.models["slat_decoder_mesh"](slat)
+            # Decode gaussian first (less memory intensive)
             if "gaussian" in formats:
                 ret["gaussian"] = self.models["slat_decoder_gs"](slat)
             if "gaussian_4" in formats:
                 ret["gaussian_4"] = self.models["slat_decoder_gs_4"](slat)
+            # Clear GPU cache before mesh decoding (memory intensive sparse conv)
+            if "mesh" in formats:
+                gc.collect()
+                torch.cuda.empty_cache()
+                logger.info("Cleared CUDA cache before mesh decoding")
+                ret["mesh"] = self.models["slat_decoder_mesh"](slat)
         # if "radiance_field" in formats:
         #     ret["radiance_field"] = self.models["slat_decoder_rf"](slat)
         return ret

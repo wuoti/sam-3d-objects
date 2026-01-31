@@ -112,6 +112,8 @@ ENV PATH="/app/.venv/bin:${PATH}"
 ENV PYTHONPATH=/app
 ENV PYTORCH_JIT=0
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# Use native spconv algorithm - uses less VRAM than implicit_gemm (default)
+ENV SPCONV_ALGO=native
 
 EXPOSE 8000
 CMD ["bash", "-lc", "/app/scripts/entrypoint.sh"]
