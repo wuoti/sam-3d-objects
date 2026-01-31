@@ -33,6 +33,9 @@ STREAM_START = os.environ.get("REDIS_STREAM_START", "$")
 STREAM_GROUP = os.environ.get("REDIS_STREAM_GROUP")
 STREAM_CONSUMER = os.environ.get("REDIS_STREAM_CONSUMER", "worker-1")
 
+LOCK_KEY = os.environ.get("REDIS_STREAM_LOCK_KEY", "jobs:stream:lock")
+LOCK_TTL_SEC = int(os.environ.get("REDIS_STREAM_LOCK_TTL_SEC", "900"))
+
 
 def _require_env() -> None:
     missing = []
@@ -164,6 +167,19 @@ def _read_stream(
     return entry_id, decoded
 
 
+def _acquire_lock(rdb: redis.Redis, token: str) -> bool:
+    return bool(rdb.set(LOCK_KEY, token, nx=True, ex=LOCK_TTL_SEC))
+
+
+def _release_lock(rdb: redis.Redis, token: str) -> None:
+    script = (
+        "if redis.call('get', KEYS[1]) == ARGV[1] then "
+        "return redis.call('del', KEYS[1]) "
+        "else return 0 end"
+    )
+    rdb.eval(script, 1, LOCK_KEY, token)
+
+
 def run_forever() -> None:
     _require_env()
     logging.basicConfig(
@@ -177,8 +193,14 @@ def run_forever() -> None:
     last_id = STREAM_START
     logging.info("Listening on redis stream %s", STREAM_NAME)
     while True:
+        token = f"{os.getpid()}-{time.time_ns()}"
+        if not _acquire_lock(rdb, token):
+            time.sleep(0.2)
+            continue
+
         entry_id, fields = _read_stream(rdb, last_id)
         if not fields:
+            _release_lock(rdb, token)
             continue
 
         job_id = _extract_job_id(fields)
@@ -187,6 +209,7 @@ def run_forever() -> None:
             if STREAM_GROUP:
                 rdb.xack(STREAM_NAME, STREAM_GROUP, entry_id)
             last_id = entry_id
+            _release_lock(rdb, token)
             continue
 
         _process_job(rdb, s3, job_id)
@@ -194,6 +217,7 @@ def run_forever() -> None:
         if STREAM_GROUP:
             rdb.xack(STREAM_NAME, STREAM_GROUP, entry_id)
         last_id = entry_id
+        _release_lock(rdb, token)
         time.sleep(0.1)
 
 
