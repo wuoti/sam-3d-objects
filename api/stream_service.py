@@ -77,7 +77,7 @@ def _extract_job_id(fields: Dict[str, str]) -> Optional[str]:
 
 
 def _set_status(rdb: redis.Redis, job_id: str, status: str) -> None:
-    rdb.hset(f"jobs:{job_id}", mapping={"status": status})
+    rdb.hset(f"job:{job_id}", mapping={"status": status})
 
 
 def _fetch_metadata(s3, job_id: str) -> Dict[str, object]:
