@@ -31,12 +31,7 @@ Follow the [setup](doc/setup.md) steps before running the following.
 
 ## Single or Multi-Object 3D Generation
 
-SAM 3D Objects can convert masked objects in an image, into 3D models with pose, shape, texture, and layout. SAM 3D is designed to be robust in challenging natural images, handling small objects and occlusions, unusual poses, and difficult situations encountered in uncurated natural scenes like this kidsroom:
-
-<p align="center">
-  <img src="notebook/images/shutterstock_stylish_kidsroom_1640806567/image.png" width="55%"/>
-  <img src="doc/kidsroom_transparent.gif" width="40%"/>
-</p>
+SAM 3D Objects can convert masked objects in an image, into 3D models with pose, shape, texture, and layout. SAM 3D is designed to be robust in challenging natural images, handling small objects and occlusions, unusual poses, and difficult situations encountered in uncurated natural scenes.
 
 For a quick start, run `python demo.py` or use the the following lines of code:
 
@@ -52,9 +47,9 @@ tag = "hf"
 config_path = f"checkpoints/{tag}/pipeline.yaml"
 inference = Inference(config_path, compile=False)
 
-# load image and mask
-image = load_image("notebook/images/shutterstock_stylish_kidsroom_1640806567/image.png")
-mask = load_single_mask("notebook/images/shutterstock_stylish_kidsroom_1640806567", index=14)
+# load image and mask (provide your own image and mask paths)
+image = load_image("path/to/your/image.png")
+mask = load_single_mask("path/to/your/masks", index=0)
 
 # run model
 output = inference(image, mask, seed=42)
